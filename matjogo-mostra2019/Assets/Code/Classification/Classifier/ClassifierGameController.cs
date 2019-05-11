@@ -20,7 +20,7 @@ public class ClassifierGameController : MonoBehaviour
         Functions funcObject = GameObject.Find("<Functions>").GetComponent<Functions>();
         plotSpace = GameObject.Find("<PlotSpace>");
 
-        int chosenFunction = Random.Range(1, 14);
+        int chosenFunction = Random.Range(1, 15);
         f = funcObject.function1;
 
         switch (chosenFunction)
