@@ -28,13 +28,7 @@ public class Agent : MonoBehaviour
     private Collider[] _myObjectsNearMe;
 
     private Vector3 _myMovingDirection;
-    private Vector3 _myShootingDirection;
-
-    private System.Action<Vector3> _myReadBulletDirection;
-    private System.Action<Vector3> _myReadEnemyDirection;
-
-    private System.Action _myShoot;
-    private System.Action _myMove;
+    private Vector3 _myDodgingDirection;
 
     private CharacterController _myCharacterController;
     private CF_GameController _myGameController;
@@ -44,6 +38,84 @@ public class Agent : MonoBehaviour
     {
         _myCharacterController = gameObject.GetComponent<CharacterController>();
         _myGameController = GameObject.FindObjectOfType<CF_GameController>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (_myIsInitialized)
+        {
+            _myObjectsNearMe = Physics.OverlapSphere(gameObject.transform.position, visionRange);
+
+            Vector3 p1, p2;
+            for (int i = 0; i < _myObjectsNearMe.Length; i++)
+            {
+                p1 = _myObjectsNearMe[i].transform.position - gameObject.transform.position;
+                __myReadEnemy(_myObjectsNearMe[i].GetComponent<Agent>(), p1, Random.Range(0.0f, 1.0f));
+                __myReadBullet(_myObjectsNearMe[i].GetComponent<Bullet>(), p1, Random.Range(0.0f, 1.0f));
+            }
+
+            __myMove(Random.Range(0.0f, 1.0f));
+            __myShoot(Random.Range(0.0f, 1.0f));
+
+            _myMovingDirection = Vector3.zero;
+        }
+    }
+
+    private void __myReadEnemy(Agent e, Vector3 direction, float behaveDecision)
+    {
+        if (e == null) return;
+        if (direction.magnitude == 0) return;
+
+        int s = behaveDecision <= chaseEnemy ? 1 : -1;
+        _myMovingDirection = _myMovingDirection + (s * direction);
+    }
+
+    private void __myReadBullet(Bullet e, Vector3 direction, float behaveDecision)
+    {
+        if (e == null) return;
+        float angle = Vector3.Angle(direction, e.direction);
+        angle = angle * Mathf.Deg2Rad;
+        if (Mathf.Abs(Mathf.Cos(angle)+1) < 0.01f)
+        {
+            if(behaveDecision <= dodgeBullet)
+            {
+                _myDodgingDirection.x += e.direction.y;
+                _myDodgingDirection.y += -e.direction.x;
+                _myDodgingDirection.z = 0.0f;
+            }
+        }
+
+        int s = behaveDecision <= chaseEnemy ? 1 : -1;
+        _myMovingDirection = _myMovingDirection + (s * direction);
+    }
+
+    private void __myMove(float behaveDecision)
+    {
+        Vector3 p = Vector3.zero;
+        if (behaveDecision <= randomMove)
+            p = Random.insideUnitCircle;
+
+        p = (_myMovingDirection + _myDodgingDirection + p).normalized;
+        p.z = 0.0f;
+        _myCharacterController.Move(p * moveSpeed * Time.deltaTime);
+    }
+
+    private void __myShoot(float behaveDecision)
+    {
+        if(_myMovingDirection.magnitude > 0)
+        {
+            Shoot(_myMovingDirection);
+        }
+        else if(behaveDecision <= randomShoot)
+        {
+            Shoot(Random.insideUnitCircle);
+        }
+    }
+
+    private void __myRefreshShoot()
+    {
+        _myCanShoot = true;
     }
 
     public void Initialize(float visionRange, float moveSpeed, float fireRate, float fireBulletSpeed, float fireDamage, float fireDuration, float r, float g, float b, float chaseEnemy, float dodgeBullet, float randomShoot, float randomMove)
@@ -62,61 +134,8 @@ public class Agent : MonoBehaviour
 
         this.GetComponent<UnityEngine.UI.Image>().color = this.color;
         _myIsInitialized = true;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (_myIsInitialized)
-        {
-            _myObjectsNearMe = Physics.OverlapSphere(gameObject.transform.position, visionRange);
-
-            Vector3 p1, p2;
-            for (int i = 0; i < _myObjectsNearMe.Length; i++)
-            {
-                p1 = _myObjectsNearMe[i].transform.position - gameObject.transform.position;
-                p2 = _myObjectsNearMe[i].transform.forward;
-                __myReadEnemy(_myObjectsNearMe[i].GetComponent<Agent>(), p1, Random.Range(0.0f, 1.0f));
-            }
-
-            __myMove(Random.Range(0.0f, 1.0f));
-            __myRandomShoot(Random.Range(0.0f, 1.0f));
-
-            _myMovingDirection = Vector3.zero;
-        }
-    }
-
-    private void __myReadEnemy(Agent e, Vector3 direction, float behaveDecision)
-    {
-        if (e == null) return;
-        if (direction.magnitude == 0) return;
-
-        int s = behaveDecision <= chaseEnemy ? 1 : -1;
-        _myMovingDirection = _myMovingDirection + (s * direction);
-    }
-
-    private void __myMove(float behaveDecision)
-    {
-        Vector3 p = Vector3.zero;
-        if (behaveDecision <= randomMove)
-            p = Random.insideUnitCircle;
-
-        _myMovingDirection = _myMovingDirection + p;
-
-        _myCharacterController.Move(_myMovingDirection.normalized * moveSpeed * Time.deltaTime);
-    }
-
-    private void __myRandomShoot(float behaveDecision)
-    {
-        if(behaveDecision <= randomShoot)
-        {
-            Shoot(Random.insideUnitCircle);
-        }
-    }
-
-    private void __myRefreshShoot()
-    {
-        _myCanShoot = true;
+        _myCanShoot = false;
+        Invoke("__myRefreshShoot", fireRate);
     }
 
     public void Shoot(Vector3 direction)
@@ -132,17 +151,16 @@ public class Agent : MonoBehaviour
         }
     }
 
-
-    void OnControllerColliderHit(ControllerColliderHit hit)
+    public void GetKill()
     {
-        Bullet b = hit.gameObject.GetComponent<Bullet>();
-        if ((b != null) && (b.owner.name != name))
-        {
-            b.owner.killCount++;
-            timeAlive = _myGameController.SampleDied();
-            GameObject.Destroy(b.gameObject);
-            this.gameObject.SetActive(false);
-        }
+        killCount++;
     }
+
+    public void GetKilled()
+    {
+        timeAlive = _myGameController.SampleDied();
+        this.gameObject.SetActive(false);
+    }
+
 }
 

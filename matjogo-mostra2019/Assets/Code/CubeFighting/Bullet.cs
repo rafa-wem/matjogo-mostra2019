@@ -19,6 +19,7 @@ public class Bullet : MonoBehaviour
         _myGameController = GameObject.FindObjectOfType<CF_GameController>();
         _myCharacterController = GetComponent<CharacterController>();
     }
+
     public void Initialize(Agent owner, Vector3 direction, float spd, float dmg, float duration)
     {
         this.owner = owner;
@@ -42,6 +43,39 @@ public class Bullet : MonoBehaviour
         if(_myIsInitialized)
         {
             _myCharacterController.Move(direction * speed * Time.deltaTime);
+        }
+    }
+
+    void FixedUpdate()
+    {
+        Collider[] c = Physics.OverlapSphere(transform.position, _myGameController.bulletKillRadius);
+
+        if(c.Length > 0)
+        {
+            int l = c.Length;
+            int i = 0;
+            Agent a;
+            while(i < l)
+            {
+                a = c[i].gameObject.GetComponent<Agent>();
+                if ((a != null) && (a.gameObject.name != owner.gameObject.name))
+                {
+                    owner.GetKill();
+                    a.GetKilled();
+                    GameObject.Destroy(gameObject);
+                    return;
+                }
+                else i++;
+            }
+        }
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        Agent a = hit.gameObject.GetComponent<Agent>();
+        if (a == null)
+        {
+            GameObject.Destroy(gameObject);
         }
     }
 }

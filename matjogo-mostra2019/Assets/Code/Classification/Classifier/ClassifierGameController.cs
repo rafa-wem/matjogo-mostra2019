@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ClassifierGameController : MonoBehaviour
 {
+    public UnityEngine.UI.Text points;
     public GameObject[] classes;
     public Vector3 delta = new Vector3(-212.5f, -212.5f, 0.0f);
     public int sampleCount = 10;
@@ -57,17 +58,21 @@ public class ClassifierGameController : MonoBehaviour
         SpawnNewPoint();
     }
 
+    private Vector3 _myTargetPosition;
+    private Vector3 _mySpeed;
     private int _myTestCount;
     private int sc, state = -1;
     private GameObject newSample;
     private float sx, sy;
     void Update()
     {
-        switch(state)
+        points.text = "" + 100.0f * ((float)hitTargets / (float)testCount) + "%";
+
+        switch (state)
         {
-            case 0: SpawnSample();  break;
-            case 1:                 break;
-            case 2: EndGame();      break;
+            case 0: SpawnSample();                                                                                                                      break;
+            case 1: classes[0].transform.localPosition = Vector3.SmoothDamp(classes[0].transform.localPosition, _myTargetPosition, ref _mySpeed, 0.3f); break;
+            case 2: EndGame();                                                                                                                          break;
         }
 
     }
@@ -77,19 +82,15 @@ public class ClassifierGameController : MonoBehaviour
         sx = Random.Range(0.0f, 100.0f);
         sy = Random.Range(0.0f, 100.0f);
         sc = f(sx, sy);
-        newSample = GameObject.Instantiate(classes[0], Vector3.zero, Quaternion.identity);
-        newSample.transform.SetParent(plotSpace.transform, false);
-        newSample.transform.localPosition = 4 * new Vector3(sx, sy, 0.0f) + delta;
+        
+        _myTargetPosition = new Vector3(4 * sx - 200.0f, 4 * sy - 200.0f, 0.0f); 
 
         state = 1;
     }
 
     void EndGame()
     {
-
-        Debug.Log((float)hitTargets/ (float)testCount);
     }
-
 
     void SpawnNewPoint()
     {
@@ -104,23 +105,23 @@ public class ClassifierGameController : MonoBehaviour
         }
     }
 
-
     #region BUTTONS
 
     private int hitTargets = 0;
     public void pressbutton(int i)
     {
-        UnityEngine.UI.Image img = newSample.GetComponent<UnityEngine.UI.Image>();
-        img.sprite = classes[i].GetComponent<UnityEngine.UI.Image>().sprite;
-
         if (sc == i)
         {
-            img.color = Color.green;
+            newSample = GameObject.Instantiate(classes[i], Vector3.zero, Quaternion.identity);
+            newSample.transform.SetParent(plotSpace.transform, false);
+            newSample.transform.localPosition = 4 * new Vector3(sx, sy, 0.0f) + delta;
             hitTargets++;
         }
         else
         {
-            img.color = Color.red;
+            newSample = GameObject.Instantiate(classes[i+4], Vector3.zero, Quaternion.identity);
+            newSample.transform.SetParent(plotSpace.transform, false);
+            newSample.transform.localPosition = 4 * new Vector3(sx, sy, 0.0f) + delta;
         }
 
         Invoke("SpawnNewPoint", spawnWaitTime);

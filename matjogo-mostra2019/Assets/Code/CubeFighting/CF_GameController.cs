@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CF_GameController : MonoBehaviour
@@ -9,10 +10,13 @@ public class CF_GameController : MonoBehaviour
 
     public Vector3 spawnOffset;
     public float spawnRadius;
+    public float bulletKillRadius;
+    
+    public int sampleAlive;
+
     public int sampleCount;
     public float maxIterationTime;
-
-    public int sampleAlive;
+    public float cunningSize;
 
     private int _myIterationCount;
     private float _myIterationStartTime;
@@ -73,7 +77,8 @@ public class CF_GameController : MonoBehaviour
 
     void Cunning()
     {
-
+        //_myAgents.OrderBy(x => x.timeAlive);
+        
     }
 
     void Reproduction()
