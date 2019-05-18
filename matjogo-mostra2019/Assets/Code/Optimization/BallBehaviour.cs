@@ -16,7 +16,7 @@ public class BallBehaviour : MonoBehaviour
     }
 
     void FixedUpdate() {
-    	ball.AddForce(acceleration*direction, ForceMode.Force);
+    	ball.AddForce(acceleration*direction, ForceMode.Force); // 100/7 acceleration/mass
     	//ball.AddForce(acceleration*direction, ForceMode.Impulse); // 0.1 
     }
 
