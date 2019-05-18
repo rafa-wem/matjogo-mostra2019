@@ -8,6 +8,8 @@ public class BallBehaviour : MonoBehaviour
 
 	private Vector3 direction;
 
+	private float sideLength = 200.0f;
+
 	public float acceleration = 0.1f;
     // Start is called before the first frame update
     void Start()
@@ -36,5 +38,14 @@ public class BallBehaviour : MonoBehaviour
         }
 
         direction.Normalize();
+    }
+
+    public void RandomPosition() 
+    {
+    	Vector3 newPosition = Vector3.zero;
+    	newPosition.y = 100;
+    	newPosition.x = Random.Range(-sideLength, sideLength);
+    	newPosition.z = Random.Range(-sideLength, sideLength);
+    	ball.MovePosition(newPosition);
     }
 }
