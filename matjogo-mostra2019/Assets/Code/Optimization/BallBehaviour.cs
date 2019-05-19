@@ -46,6 +46,7 @@ public class BallBehaviour : MonoBehaviour
     	newPosition.y = 100;
     	newPosition.x = Random.Range(-sideLength, sideLength);
     	newPosition.z = Random.Range(-sideLength, sideLength);
+    	ball.velocity = Vector3.zero;
     	ball.MovePosition(newPosition);
     }
 }
