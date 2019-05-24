@@ -9,12 +9,43 @@ public class Window_Graph : MonoBehaviour
     [SerializeField] private Sprite circleSprite;
     private RectTransform graphContainer;
 
+    protected Vector2 MaxXY(List<Vector2> list)
+    {
+        Vector2 max = list[0];
+        for (int i = 1; i < list.Count; i++)
+        {
+            if (list[i].x > max.x) max.x = list[i].x;
+            if (list[i].y > max.y) max.y = list[i].y;
+        }
+        return max;
+    }
+
+    
+
     private void Awake()
     {
         graphContainer = transform.Find("graphContainer").GetComponent<RectTransform>();
         // CreateCircle(new Vector2(200, 200));
-        List<int> valueList = new List<int> { 5 ,2, 3, 15, 1, 2, 13, 8, 2, 98, 99, 12};
+        List<Vector2> valueList = new List<Vector2>();
+        Vector2 v = new Vector2();
+        for (int i = 0; i < 10; i++)
+        {
+            v.x = Random.Range(0f, 100f);
+            v.y = Random.Range(0f, 300f);
+            valueList.Add(v);
+        }
+      
         showGraph(valueList);
+        //for(int i = 0; i < valueList.Count; i++)
+        //{
+        //    Debug.Log(valueList[i]);
+        //}
+        //Debug.Log(MaxXY(valueList));
+    }
+
+    private void Start()
+    {
+        
     }
 
     private void CreateCircle (Vector2 anchoredPosition)
@@ -22,6 +53,7 @@ public class Window_Graph : MonoBehaviour
         GameObject gameObject = new GameObject("circle", typeof(Image));
         gameObject.transform.SetParent(graphContainer, false);
         gameObject.GetComponent<Image>().sprite = circleSprite;
+        //Debug.Log(circleSprite.rect.height);
         RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = anchoredPosition;
         rectTransform.sizeDelta = new Vector2(11,11);
@@ -29,16 +61,22 @@ public class Window_Graph : MonoBehaviour
         rectTransform.anchorMax = new Vector2(0, 0);
     }
 
-    private void showGraph(List<int> valueList)
+    private void showGraph(List<Vector2> coords)
     {
         float graphHeight = graphContainer.sizeDelta.y;
-        float yMaximum = 100f;
-        float xSize = 50f;
-        for (int i = 0; i < valueList.Count; i++)
+        float graphWidth = graphContainer.sizeDelta.x;
+        Vector2 maxCoords = MaxXY(coords);
+        const float halfSpriteSize = 5f;
+        for (int i = 0; i < coords.Count; i++)
         {
-            float xPosition = 20f + i * xSize;
-            float yPosition = (valueList[i] / yMaximum) * graphHeight;
-            CreateCircle(new Vector2(xPosition, yPosition));
+            float xPosition = (coords[i].x/maxCoords.x) * (graphWidth - halfSpriteSize);
+            float yPosition = (coords[i].y/maxCoords.y) * (graphHeight- halfSpriteSize);
+        CreateCircle(new Vector2(xPosition, yPosition));
         }
+    }
+
+    public void plotRandomFunction()
+    {
+
     }
 }
