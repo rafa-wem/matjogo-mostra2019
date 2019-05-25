@@ -60,5 +60,6 @@ public class BallBehaviour : MonoBehaviour
     public void Finish() {
         finished = true;
         ball.velocity = Vector3.zero;
+        ball.angularVelocity = Vector3.zero;
     }
 }
