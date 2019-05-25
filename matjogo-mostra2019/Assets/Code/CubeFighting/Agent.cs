@@ -23,12 +23,15 @@ public class Agent : MonoBehaviour
     public float randomShoot;       //Madness
     public float randomMove;        //Wandering
 
+	public float[] properties = new float[13];
+
     private bool _myIsInitialized = false;
     private bool _myCanShoot = true;
     private Collider[] _myObjectsNearMe;
 
     private Vector3 _myMovingDirection;
     private Vector3 _myDodgingDirection;
+	private Vector3 _myInitialPosition;
 
     private CharacterController _myCharacterController;
     private CF_GameController _myGameController;
@@ -38,6 +41,7 @@ public class Agent : MonoBehaviour
     {
         _myCharacterController = gameObject.GetComponent<CharacterController>();
         _myGameController = GameObject.FindObjectOfType<CF_GameController>();
+		_myInitialPosition =  gameObject.transform.position;
     }
 
     // Update is called once per frame
@@ -132,11 +136,36 @@ public class Agent : MonoBehaviour
         this.randomShoot = randomShoot;
         this.randomMove = randomMove;
 
+		SetProperties();
+
         this.GetComponent<UnityEngine.UI.Image>().color = this.color;
         _myIsInitialized = true;
         _myCanShoot = false;
         Invoke("__myRefreshShoot", fireRate);
     }
+
+	public void Initialize(float[] properties)
+	{
+		Initialize(properties[0],properties[1],properties[2],properties[3],properties[4],
+				   properties[5],properties[6],properties[7],properties[8],properties[9],
+				   properties[10],properties[11],properties[12]);
+	}
+
+	private void SetProperties(){
+		this.properties[0] = this.visionRange;
+		this.properties[1] = this.moveSpeed;
+		this.properties[2] = this.fireRate;
+		this.properties[3] = this.fireDuration;
+		this.properties[4] = this.fireBulletSpeed;
+		this.properties[5] = this.fireDamage;
+		this.properties[6] = this.color.r;
+		this.properties[7] = this.color.g;
+		this.properties[8] = this.color.b;
+		this.properties[9] = this.chaseEnemy;
+		this.properties[10] = this.dodgeBullet;
+		this.properties[11] = this.randomShoot;
+		this.properties[12] = this.randomMove;
+	}
 
     public void Shoot(Vector3 direction)
     {
@@ -161,6 +190,16 @@ public class Agent : MonoBehaviour
         timeAlive = _myGameController.SampleDied();
         this.gameObject.SetActive(false);
     }
+
+	public void Refresh()
+	{
+		killCount = 0;
+		timeAlive = 0;
+		gameObject.transform.position = _myInitialPosition;
+		_myIsInitialized = true;
+		_myCanShoot = false;
+		Invoke("__myRefreshShoot", fireRate);
+	}
 
 }
 

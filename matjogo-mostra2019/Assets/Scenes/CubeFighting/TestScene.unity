@@ -153,9 +153,11 @@ MonoBehaviour:
   bullet: {fileID: 2010815978352078464, guid: 7b6e9da28f240da4881e668a1954cb2b, type: 3}
   spawnOffset: {x: 512, y: 384, z: 0}
   spawnRadius: 200
-  sampleCount: 200
-  maxIterationTime: 60
+  bulletKillRadius: 0
   sampleAlive: 0
+  sampleCount: 200
+  maxIterationTime: 10
+  cunningSize: 0.5
 --- !u!4 &148647811
 Transform:
   m_ObjectHideFlags: 0
