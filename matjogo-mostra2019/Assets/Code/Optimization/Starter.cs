@@ -7,8 +7,7 @@ public class Starter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Random rnd = new Random();
-        Application.LoadScene(rnd.Next(1,4));
+        SceneManager.LoadScene(Random.Range(0, SceneManager.sceneCount));
     }
 
     // Update is called once per frame
