@@ -15,8 +15,11 @@ public class ClassifierGameController : MonoBehaviour
     private int _mySampleCount;
     private List<GameObject> _generatedSamples;
     private GameObject _myCurrentDifficulty;
+    private GameObject _myEndingScreen;
+    private UnityEngine.UI.Text _myFinalScore;
     private Functions funcObject;
     private int hitTargets = 0;
+    private int sampleSum = 0;
 
     private delegate int r2function(float x, float y);
     private r2function f;
@@ -30,24 +33,28 @@ public class ClassifierGameController : MonoBehaviour
         funcObject = GameObject.Find("<Functions>").GetComponent<Functions>();
         plotSpace = GameObject.Find("<PlotSpace>");
         _myCurrentDifficulty = GameObject.Find("<difficulty>");
+        _myEndingScreen = GameObject.Find("<endscreen>");
+        _myFinalScore = GameObject.Find("<endgametext>").GetComponent<UnityEngine.UI.Text>();
         _generatedSamples = new List<GameObject>();
+        ResetLevel();
         StartLevel();
     }
 
     void ResetLevel()
     {
-        _mySampleCount = sampleCount;
+        _myEndingScreen.SetActive(false);
+        difficulty = 0;
         hitTargets = 0;
-
-        foreach(GameObject go in _generatedSamples)
-        {
-            Destroy(go);
-        }
     }
 
     void StartLevel()
     {
-        ResetLevel();
+        sampleSum += testCount;
+
+        foreach (GameObject go in _generatedSamples)
+        {
+            Destroy(go);
+        }
 
         f = funcObject.function1;
 
@@ -57,11 +64,13 @@ public class ClassifierGameController : MonoBehaviour
 
         switch (difficulty)
         {
-            case 0:     chosenFunction = Random.Range(1, 5);    break;
-            case 1:     chosenFunction = Random.Range(6, 9);    break;
-            case 2:     chosenFunction = Random.Range(11, 15);  break;
-            default:    chosenFunction = Random.Range(1, 15);   break;
+            case 0:     chosenFunction = Random.Range(1, 5);    sampleCount = (50 * chosenFunction) + 100;  break;
+            case 1:     chosenFunction = Random.Range(6, 9);    sampleCount = (20 * chosenFunction) + 100;  break;
+            case 2:     chosenFunction = Random.Range(11, 15);  sampleCount = ( 5 * chosenFunction) + 100;  break;
+            default:    chosenFunction = Random.Range(1, 15);   sampleCount = (50 * chosenFunction) + 100;  break;
         }
+
+        _mySampleCount = sampleCount;
 
         switch (chosenFunction)
         {
@@ -106,7 +115,7 @@ public class ClassifierGameController : MonoBehaviour
     private float sx, sy;
     void Update()
     {
-        score.text = "" + 100.0f * ((float)hitTargets / (float)testCount) + "%";
+        score.text = "" + 100.0f * ((float)hitTargets / (float)sampleSum) + "%";
 
         switch (state)
         {
@@ -133,7 +142,15 @@ public class ClassifierGameController : MonoBehaviour
     {
         difficulty++;
         if (difficulty <= 2)
+        {
             Invoke("StartLevel", 2.0f);
+        }
+        else
+        {
+            _myFinalScore.text = "PARABÉNS\n\n VOCÊ ACERTOU " + hitTargets + "/" + sampleSum +"!";
+            _myEndingScreen.SetActive(true);
+        }
+            
         state = 3;
     }
 
@@ -155,21 +172,25 @@ public class ClassifierGameController : MonoBehaviour
 
     public void pressbutton(int i)
     {
-        if (sc == i)
+        if (state == 1)
         {
-            newSample = GameObject.Instantiate(classes[i], Vector3.zero, Quaternion.identity);
-            newSample.transform.SetParent(plotSpace.transform, false);
-            newSample.transform.localPosition = 4 * new Vector3(sx, sy, 0.0f) + delta;
-            hitTargets++;
+            if (sc == i)
+            {
+                newSample = GameObject.Instantiate(classes[i], Vector3.zero, Quaternion.identity);
+                newSample.transform.SetParent(plotSpace.transform, false);
+                newSample.transform.localPosition = 4 * new Vector3(sx, sy, 0.0f) + delta;
+                hitTargets++;
+            }
+            else
+            {
+                newSample = GameObject.Instantiate(classes[i + 4], Vector3.zero, Quaternion.identity);
+                newSample.transform.SetParent(plotSpace.transform, false);
+                newSample.transform.localPosition = 4 * new Vector3(sx, sy, 0.0f) + delta;
+            }
+            _generatedSamples.Add(newSample);
+            Invoke("SpawnNewPoint", spawnWaitTime);
+            state = 3;
         }
-        else
-        {
-            newSample = GameObject.Instantiate(classes[i+4], Vector3.zero, Quaternion.identity);
-            newSample.transform.SetParent(plotSpace.transform, false);
-            newSample.transform.localPosition = 4 * new Vector3(sx, sy, 0.0f) + delta;
-        }
-        _generatedSamples.Add(newSample);
-        Invoke("SpawnNewPoint", spawnWaitTime);
     }
 
     public void PressClass1()
@@ -192,6 +213,11 @@ public class ClassifierGameController : MonoBehaviour
         pressbutton(4);
     }
 
+    public void PressReset()
+    {
+        ResetLevel();
+        StartLevel();
+    }
 
     #endregion
 
