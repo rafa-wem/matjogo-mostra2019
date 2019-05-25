@@ -26,16 +26,18 @@ public class Window_Graph : MonoBehaviour
     {
         graphContainer = transform.Find("graphContainer").GetComponent<RectTransform>();
         // CreateCircle(new Vector2(200, 200));
-        List<Vector2> valueList = new List<Vector2>();
-        Vector2 v = new Vector2();
-        for (int i = 0; i < 10; i++)
-        {
-            v.x = Random.Range(0f, 100f);
-            v.y = Random.Range(0f, 300f);
-            valueList.Add(v);
-        }
-      
-        showGraph(valueList);
+        //List<Vector2> valueList = new List<Vector2>();
+        //Vector2 v = new Vector2();
+        //for (int i = 0; i < 10; i++)
+        //{
+        //    v.x = Random.Range(0f, 100f);
+        //    v.y = Random.Range(0f, 300f);
+        //    valueList.Add(v);
+        //}
+
+        int size = 30;
+        plotRandomFunction(size);
+        //showGraph(valueList);
         //for(int i = 0; i < valueList.Count; i++)
         //{
         //    Debug.Log(valueList[i]);
@@ -56,7 +58,7 @@ public class Window_Graph : MonoBehaviour
         //Debug.Log(circleSprite.rect.height);
         RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
         rectTransform.anchoredPosition = anchoredPosition;
-        rectTransform.sizeDelta = new Vector2(11,11);
+        rectTransform.sizeDelta = new Vector2(5,5);
         rectTransform.anchorMin = new Vector2(0, 0);
         rectTransform.anchorMax = new Vector2(0, 0);
     }
@@ -69,14 +71,34 @@ public class Window_Graph : MonoBehaviour
         const float halfSpriteSize = 5f;
         for (int i = 0; i < coords.Count; i++)
         {
-            float xPosition = (coords[i].x/maxCoords.x) * (graphWidth - halfSpriteSize);
+            float xPosition = 3f +(coords[i].x/maxCoords.x) * (graphWidth - halfSpriteSize);
             float yPosition = (coords[i].y/maxCoords.y) * (graphHeight- halfSpriteSize);
         CreateCircle(new Vector2(xPosition, yPosition));
         }
     }
 
-    public void plotRandomFunction()
+    public void plotRandomFunction(int length)
     {
+        float xStep = 10f;
+        List<Vector2> coords = new List<Vector2>();
+        for (int i = 0; i < length; i++)
+        {
+            float xPos = i * xStep;
+            float yPos = Random.Range(0, 300);
+            Vector2 v = new Vector2(xPos, yPos);
+            coords.Add(v);
+        }
+        showGraph(coords);
+    }
 
+    public void connectDots(Vector2 A, Vector2 B)
+    {
+        GameObject gameObject = new GameObject("connection", typeof(Image));
+        gameObject.transform.SetParent(graphContainer, false);
+        RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+        rectTransform.anchorMin = new Vector2(0,0);
+        rectTransform.anchorMax = new Vector2(0,0);
+        rectTransform.sizeDelta = new Vector2(100, 3f);
+        rectTransform.anchoredPosition = A;
     }
 }
