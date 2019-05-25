@@ -10,7 +10,9 @@ public class BallBehaviour : MonoBehaviour
 
 	private float sideLength = 200.0f;
 
-	public float acceleration = 0.1f;
+	public float acceleration = 100f;
+
+    private bool finished = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,13 +20,16 @@ public class BallBehaviour : MonoBehaviour
     }
 
     void FixedUpdate() {
+        if(finished) return;
     	ball.AddForce(acceleration*direction, ForceMode.Force); // 100/7 acceleration/mass
-    	//ball.AddForce(acceleration*direction, ForceMode.Impulse); // 0.1 
+    	//ball.AddForce(acceleration*direction, ForceMode.Impulse); // 0.1
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(finished) return;
+
         if(Input.GetKey(KeyCode.W)) {
         	direction.z += 1;
         } else if (Input.GetKey(KeyCode.A)) {
@@ -42,13 +47,18 @@ public class BallBehaviour : MonoBehaviour
         direction.Normalize();
     }
 
-    public void RandomPosition() 
+    public void RandomPosition()
     {
     	Vector3 newPosition = Vector3.zero;
-    	newPosition.y = 100;
+    	newPosition.y = 50;
     	newPosition.x = Random.Range(-sideLength, sideLength);
     	newPosition.z = Random.Range(-sideLength, sideLength);
     	ball.velocity = Vector3.zero;
     	ball.MovePosition(newPosition);
+    }
+
+    public void Finish() {
+        finished = true;
+        ball.velocity = Vector3.zero;
     }
 }
