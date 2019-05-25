@@ -38,8 +38,6 @@ public class BallBehaviour : MonoBehaviour
         	direction.z -= 1;
         } else if (Input.GetKey(KeyCode.D)) {
         	direction.x += 1;
-        } else if (Input.GetKey(KeyCode.Space)) { // Everyone loves jumping, right? But this is just a test, so let's ignore it for a while
-        	direction.y += 3;
         } else {
         	direction = Vector3.zero;
         }
